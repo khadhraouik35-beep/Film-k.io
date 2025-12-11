@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مكتبة الأفلام</title>
+
+<style>
+body{
+  margin:0;background:#0d0d0d;color:#fff;
+  font-family:Arial, sans-serif;
+}
+
+header{
+  background:#000;padding:15px;text-align:center;
+  position:sticky;top:0;z-index:100;
+  border-bottom:2px solid #e50914;
+}
+
+nav{
+  display:flex;overflow-x:auto;gap:10px;
+  padding:10px;background:#111;
+}
+
+nav button{
+  padding:8px 18px;background:#222;color:#fff;border:none;
+  border-radius:20px;font-size:15px;white-space:nowrap;
+}
+nav button:hover{background:#e50914;}
+
+.grid{
+  padding:10px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:15px;
+}
+
+.card{
+  background:#1b1b1b;border-radius:8px;cursor:pointer;
+  transition:0.25s;overflow:hidden;
+  box-shadow:0 4px 10px rgba(0,0,0,0.5);
+}
+
+.card:hover{transform:scale(1.07);}
+
+.card img{
+  width:100%;height:220px;object-fit:cover;
+}
+
+.card h4{
+  margin:8px;font-size:16px;text-align:center;
+}
+
+.server-box{
+  height:65vh;padding:10px;
+}
+
+.server-box iframe{
+  width:100%;height:100%;border:none;background:#000;
+  border-radius:10px;
+}
+
+.back{
+  padding:8px 15px;background:#e50914;border:none;
+  border-radius:5px;color:#fff;font-size:16px;
+  margin-right:auto;
+}
+
+.episodes h3{
+  padding:10px;margin:0;background:#111;
+  border-left:4px solid #e50914;
+}
+
+.episodes button{
+  padding:7px 15px;background:#222;border:none;color:#fff;
+  border-radius:6px;margin:5px;font-size:14px;
+}
+.episodes button:hover{background:#e50914;}
+</style>
+</head>
+
+<body>
+
+<header><h2>مكتبة الأفلام و المسلسلات</h2></header>
+
+<nav id="tabs"></nav>
+
+<div id="itemsGrid" class="grid"></div>
+
+<div id="watchPage" style="display:none;padding-bottom:30px;">
+  <header style="display:flex;align-items:center;gap:20px;">
+    <button class="back" onclick="goBack()">رجوع</button>
+    <h2 id="movieTitle" style="flex:1;"></h2>
+  </header>
+
+  <div class="server-box">
+    <iframe id="serverFrame" allowfullscreen></iframe>
+  </div>
+
+  <div id="episodesList" class="episodes"></div>
+</div>
+
+<script>
+
+// ------------------------------------
+// زر الرجوع للهاتف
+//-------------------------------------
+window.addEventListener("popstate", function () {
+  goBack();
+});
+
+function pushState(){
+  history.pushState({page:"watch"}, "");
+}
+
+// ------------------------------------
+// التبويبات
+//-------------------------------------
+const tabs = ["الكل","أكشن","دراما","كوميديا","رعب","خيال علمي","مسلسلات","الأكثر مشاهدة"];
+
+// ------------------------------------
+// أسماء الأفلام
+// ------------------------------------
+// ملاحظة مهمّة جداً:
+// الصور يجب أن تكون في نفس مجلد الكود مثل:
+// movie1.jpg , movie2.jpg , movie3.jpg ...
+// لأن السطر التالي يقرأ اسم الصورة تلقائياً:
+//
+const movieNames = [
+"John Wick","Fast & Furious 7","The Dark Knight","Interstellar","Inception",
+"Gladiator","The Matrix","Avatar","Avengers Endgame","Iron Man",
+"Mission Impossible Fallout","Mad Max Fury Road","Joker","Dune","Oppenheimer",
+"Spider-Man No Way Home","The Equalizer","Taken","Black Panther","Tenet",
+"Doctor Strange","Rush Hour","The Revenant","The Wolf of Wall Street",
+"Shutter Island","The Godfather","Scarface","The Irishman","The Gentlemen",
+"Nobody","The Meg","Gravity","Edge of Tomorrow","Lucy","Oblivion",
+"Top Gun Maverick","Mortal Kombat","Rampage","San Andreas","Man of Steel",
+"Creed","Rocky","Hacksaw Ridge","1917","Fury","World War Z","I Am Legend",
+"King Kong","The Hunger Games","Divergent","The Nun","The Conjuring",
+"Annabelle","IT","Smile","Insidious","The Grudge","Lights Out",
+"Deadpool","Logan","Wolverine","Thor","Hulk","Captain America","Black Adam",
+"Shazam","Aquaman","Transformers","Pacific Rim","Godzilla","Kong Skull Island",
+"Pirates of the Caribbean","Sherlock Holmes","The Mummy","Aladdin","Harry Potter",
+"Lord of the Rings","Hobbit","Snowden","American Sniper","Sicario","Heat",
+"Collateral","Baby Driver","Drive","La La Land","A Quiet Place","Real Steel",
+"Robin Hood","Troy","300","Clash of Titans","Wrath of Titans","Kingsman","Hitman"
+];
+
+// ------------------------------------
+// المسلسلات — 20 مسلسل
+// ------------------------------------
+// نفس الشيء: يجب أن تضع الصور بجانب الكود على شكل:
+// series1.jpg , series2.jpg ... series20.jpg
+//
+const seriesNames = [
+"Breaking Bad","Game of Thrones","Peaky Blinders","La Casa de Papel","Vikings",
+"The Witcher","Dark","Stranger Things","The Last of Us","The Walking Dead",
+"Narcos","Prison Break","Sherlock","Loki","The Boys","House of the Dragon",
+"Mr Robot","The Blacklist","The 100","Lost"
+];
+
+// ------------------------------------
+// قاعدة البيانات
+//-------------------------------------
+let allItems = [];
+
+// ------------------------------------
+// إضافة الأفلام
+//-------------------------------------
+// ⚠ ملاحظة عن السيرفرات:
+// داخل servers توجد 3 روابط فارغة: "" , "" , ""
+// هنا يمكنك وضع روابط المشاهدة هكذا:
+// "https://uqload.com/embed-xxxxx"
+// "https://dood.watch/e/xxxx"
+// "https://vidstream.com/embed/xxx"
+//
+movieNames.forEach((name, i)=>{
+  allItems.push({
+    id: i+1,
+    type:"movie",
+    title:name,
+    poster:"movie"+(i+1)+".jpg", // ← هنا توضع صور الأفلام
+    category: (i%5===0?"أكشن":i%5===1?"دراما":i%5===2?"كوميديا":i%5===3?"رعب":"خيال علمي"),
+    servers:[  
+      "https://hglink.to/e/0uhplzzrsbmr", // ← رابط السيرفر الثاني
+      ""  // ← رابط السيرفر الثالث
+    ]
+  });
+});
+
+// ------------------------------------
+// إضافة المسلسلات
+//-------------------------------------
+// ⚠ ملاحظة عن الحلقات:
+// داخل eps.push("") يتم وضع رابط الحلقة مثل:
+// eps.push("https://uqload.com/embed-s1e1")
+// eps.push("https://dood.watch/e/episode5")
+//
+seriesNames.forEach((name,i)=>{
+  let seasons=[];
+  for(let s=1;s<=5;s++){
+    let eps=[];
+    for(let e=1;e<=12;e++){
+      eps.push(""); // ← ضع هنا رابط حلقة المسلسل
+    }
+    seasons.push({episodes:eps});
+  }
+  allItems.push({
+    id:200+i+1,
+    type:"series",
+    title:name,
+    poster:"series"+(i+1)+".jpg", // ← صور المسلسلات
+    category:"مسلسلات",
+    servers:["","",""], // ← يمكنك أيضاً وضع 3 سيرفرات ثابتة لكل مسلسل
+    seasons:seasons
+  });
+});
+
+// ------------------------------------
+// التبويبات
+//-------------------------------------
+const tabDiv=document.getElementById("tabs");
+
+tabs.forEach(t=>{
+  const b=document.createElement("button");
+  b.textContent=t;
+  b.onclick=()=>filterItems(t);
+  tabDiv.appendChild(b);
+});
+
+// ------------------------------------
+// عرض القائمة
+//-------------------------------------
+const grid=document.getElementById("itemsGrid");
+
+function showAll(list){
+  grid.innerHTML="";
+  list.forEach(item=>{
+    const c=document.createElement("div");
+    c.className="card";
+    c.onclick=()=>openItem(item.id);
+    c.innerHTML=`
+      <img src="${item.poster}">  
+      <h4>${item.title}</h4>
+    `;
+    grid.appendChild(c);
+  });
+}
+
+showAll(allItems);
+
+// ------------------------------------
+// فلترة
+//-------------------------------------
+function filterItems(t){
+  if(t==="الكل") showAll(allItems);
+  else if(t==="مسلسلات") showAll(allItems.filter(x=>x.type==="series"));
+  else showAll(allItems.filter(x=>x.category===t));
+}
+
+// ------------------------------------
+// فتح صفحة الفيلم أو المسلسل
+//-------------------------------------
+function openItem(id){
+  pushState();
+
+  const item = allItems.find(x=>x.id==id);
+
+  document.getElementById("itemsGrid").style.display="none";
+  document.getElementById("watchPage").style.display="block";
+
+  document.getElementById("movieTitle").textContent=item.title;
+
+  // أول سيرفر يتم عرضه
+  document.getElementById("serverFrame").src=item.servers[0];
+
+  // لو مسلسل → عرض الحلقات
+  let html="";
+  if(item.type==="series"){
+    item.seasons.forEach((s,si)=>{
+      html+=`<h3>الموسم ${si+1}</h3>`;
+      s.episodes.forEach((ep,ei)=>{
+        html+=`<button onclick="document.getElementById('serverFrame').src='${ep}'">حلقة ${ei+1}</button>`;
+      });
+    });
+  }
+
+  document.getElementById("episodesList").innerHTML=html;
+}
+
+// ------------------------------------
+// رجوع
+//-------------------------------------
+function goBack(){
+  document.getElementById("watchPage").style.display="none";
+  document.getElementById("itemsGrid").style.display="grid";
+  document.getElementById("serverFrame").src="";
+}
+
+</script>
+
+</body>
+</html>
