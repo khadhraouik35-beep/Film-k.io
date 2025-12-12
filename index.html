@@ -76,6 +76,21 @@ border-radius:6px;margin:5px;font-size:14px;
 <header><h2>مكتبة الأفلام و المسلسلات</h2></header>
 <nav id="tabs"></nav>
 
+<!-- ⭐ إعلان رقم 1 — الصفحة الرئيسية -->
+<div style="padding:10px;">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8858989765307569"
+     crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="fluid"
+     data-ad-layout-key="+20+s6-1h-2r+au"
+     data-ad-client="ca-pub-8858989765307569"
+     data-ad-slot="5429319367"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div>
+
 <div id="itemsGrid" class="grid"></div>
 
 <div id="watchPage" style="display:none;padding-bottom:30px;">
@@ -84,17 +99,53 @@ border-radius:6px;margin:5px;font-size:14px;
     <h2 id="movieTitle" style="flex:1;"></h2>
   </header>
 
+  <!-- ⭐ إعلان رقم 2 — صفحة مشاهدة الفيلم -->
+  <div style="padding:10px;">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8858989765307569"
+     crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="fluid"
+     data-ad-layout-key="+20+s6-1h-2r+au"
+     data-ad-client="ca-pub-8858989765307569"
+     data-ad-slot="5429319367"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+  </div>
+
   <div class="server-box">
     <iframe id="serverFrame" allowfullscreen></iframe>
   </div>
 
   <div id="episodesList" class="episodes"></div>
+
+  <!-- ⭐ إعلان رقم 3 — أسفل حلقات المسلسلات -->
+  <div style="padding:10px;">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8858989765307569"
+     crossorigin="anonymous"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="fluid"
+     data-ad-layout-key="+20+s6-1h-2r+au"
+     data-ad-client="ca-pub-8858989765307569"
+     data-ad-slot="5429319367"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+  </div>
+
 </div>
 
 <script>
 // زر الرجوع
 window.addEventListener("popstate", ()=>{ goBack(); });
 function pushState(){ history.pushState({page:"watch"}, ""); }
+
+// ⭐⭐⭐ تمت الإضافة: دالة تشغيل الإعلان بعد الضغط ⭐⭐⭐
+function refreshAds(){
+  try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){}
+}
 
 // -----------------------------
 // التبويبات
@@ -111,8 +162,8 @@ const filmServers = [
   "https://www.vidspeeds.com:2053/embed-u6v08qupu0ro.html",
   "https://www.vidspeeds.com:2053/embed-mcp8hd8q9td2.html",
   "https://vidoba.cc/embed-d9ie1k9tq9l5.html",
-  "https://www.vidroba.com:2053/embed-orev1bit9j8q.html"
-  ,"https://www.vidroba.com:2053/embed-bxkiq5gmrykw.html",
+  "https://www.vidroba.com:2053/embed-orev1bit9j8q.html",
+  "https://www.vidroba.com:2053/embed-bxkiq5gmrykw.html",
   "https://movearnpre.com/embed/7x3i4nriqqyt",
   "https://www.vidroba.com:2053/embed-phdzqrkrdllt.html",
   "https://hglink.to/e/iivqmdii9zc2",
@@ -146,8 +197,8 @@ const filmServers = [
   "https://dhtpre.com/embed/34yfpts0dnrg",
   "https://www.vidroba.com:2053/embed-wpigqh7dm261.html",
   "https://www.vidroba.com:2053/embed-f5xkr43oq7lu.html",
-  "https://www.vidroba.com:2053/embed-a22swtsr99m0.html"
-  ,"https://www.vidspeeds.com:2053/embed-c63hj11gp65o.html",
+  "https://www.vidroba.com:2053/embed-a22swtsr99m0.html",
+  "https://www.vidspeeds.com:2053/embed-c63hj11gp65o.html",
   "https://www.vidspeeds.com:2053/embed-gdtq7a3vucnx.html",
   "https://www.vidspeeds.com:2053/embed-euqigxokhc4q.html",
   "https://www.vidspeeds.com:2053/embed-fnkmodb5v8gi.html",
@@ -314,7 +365,13 @@ function showAll(list){
   list.forEach(item=>{
     const c=document.createElement("div");
     c.className="card";
-    c.onclick=()=>openItem(item.id);
+    c.onclick=()=>{
+
+      // ⭐⭐⭐ تمت الإضافة هنا: إعلان عند الضغط على فيلم ⭐⭐⭐
+      refreshAds();
+
+      openItem(item.id);
+    };
     c.innerHTML=`
       <img src="${item.poster}">
       <h4>${item.title}</h4>
@@ -331,6 +388,10 @@ function filterItems(t){
 }
 
 function openItem(id){
+
+  // ⭐⭐⭐ تمت الإضافة هنا أيضًا ⭐⭐⭐
+  refreshAds();
+
   pushState();
   const item=allItems.find(x=>x.id==id);
 
@@ -345,7 +406,10 @@ function openItem(id){
     item.seasons.forEach((s,si)=>{
       html+=`<h3>الموسم ${si+1}</h3>`;
       s.episodes.forEach((ep,ei)=>{
-        html+=`<button onclick="document.getElementById('serverFrame').src='${ep}'">حلقة ${ei+1}</button>`;
+
+        // ⭐⭐⭐ إعلان عند الضغط على الحلقة ⭐⭐⭐
+        html+=`<button onclick="document.getElementById('serverFrame').src='${ep}'; refreshAds();">حلقة ${ei+1}</button>`;
+
       });
     });
   }
